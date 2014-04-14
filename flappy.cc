@@ -93,7 +93,7 @@ struct World {
         }
       }
     }
-    mvprintw(display->height + 1, 0, "Score: %d", score());
+    mvprintw(display->height, 0, "Score: %d", score());
   }
 
   int score() { return std::max(0, steps / (kRate * kHGap) - 2); }
@@ -132,38 +132,51 @@ struct Bird {
   }
 };
 
-int main() {
-  srand(std::time(NULL));
-  Display display;
-  while (true) {
-    Bird bird{&display};
-    World world{&display};
+struct Game {
+  Game(Display *display) : display{display}, bird{display}, world{display} {}
+
+  Display *display;
+  Bird bird;
+  World world;
+
+  bool run() {
     while (bird.is_alive(world)) {
       int c = getch();
       if (c == 'q') {
-        return 0;
+        return false;
       } else if (c != ERR) {
         while (getch() != ERR)
           ;  // clear repeat buffer
         bird.poke();
       }
-      display.erase();
+      display->erase();
       world.step();
       world.draw();
       bird.gravity();
       bird.draw();
-      display.refresh();
+      display->refresh();
       std::this_thread::sleep_for(std::chrono::milliseconds{67});
     }
     bird.draw('X');
-    mvprintw(display.height + 2, 0,
-             "Game over! Press 'q' to quit, 'r' to retry.");
-    while (true) {
-      int c = display.block_getch();
-      if (c == 'q') {
+    display->refresh();
+    return true;
+  }
+};
+
+int main() {
+  srand(std::time(NULL));
+  Display display;
+  while (true) {
+    Game game{&display};
+    if (!game.run()) {
+      return 0;
+    }
+    mvprintw(display.height + 1, 0, "Game over!");
+    mvprintw(display.height + 2, 0, "Press 'q' to quit, 'r' to retry.");
+    int c;
+    while ((c = display.block_getch()) != 'r') {
+      if (c == 'q' || c == ERR) {
         return 0;
-      } else if (c == 'r') {
-        break;
       }
     }
   }
