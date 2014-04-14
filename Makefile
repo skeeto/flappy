@@ -1,13 +1,17 @@
 CXX      = clang++
+CC       = clang
 CXXFLAGS = -std=c++11 -Wall
-LDLIBS   = -lncurses
+CFLAGS   = -O3 -DSQLITE_THREADSAFE=0
+LDLIBS   = -lncurses -ldl -lstdc++ -lm
 
-flappy : flappy.cc
+all : flappy
 
-.PHONY : run clean
+flappy : flappy.o highscores.o sqlite3.o
+
+.PHONY : all run clean
 
 run : flappy
 	./$^
 
 clean :
-	$(RM) flappy
+	$(RM) flappy *.o

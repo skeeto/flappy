@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cstring>
 #include <ncurses.h>
+#include "sqlite3.h"
+#include "highscores.hh"
 
 struct Display {
   Display(int width = 40, int height = 20) : height{height}, width{width} {
@@ -109,7 +111,7 @@ struct World {
 struct Bird {
   Bird(Display *display) : y{display->height / 2.0}, display{display} {}
 
-  const double kImpulse = -0.8, kGravity = 0.1;
+  static constexpr double kImpulse = -0.8, kGravity = 0.1;
 
   double y, dy = kImpulse;
   Display *display;
@@ -148,7 +150,7 @@ struct Game {
   Bird bird;
   World world;
 
-  bool run() {
+  int run() {
     display->erase();
     const char *intro = "[Press any key to hop upwards]";
     mvprintw(display->height / 2 - 2,
@@ -159,7 +161,7 @@ struct Game {
     while (bird.is_alive(world)) {
       int c = getch();
       if (c == 'q') {
-        return false;
+        return -1;
       } else if (c != ERR) {
         while (getch() != ERR)
           ;  // clear repeat buffer
@@ -175,19 +177,33 @@ struct Game {
     }
     bird.draw('X');
     display->refresh();
-    return true;
+    return world.score();
   }
 };
 
 int main() {
   srand(std::time(NULL));
   Display display;
+  HighScores scores{"/tmp/highscores.db", display.height};
   while (true) {
     Game game{&display};
-    if (!game.run()) {
+    int score = game.run();
+    if (score < 0) {
       return 0;
     }
     mvprintw(display.height + 1, 0, "Game over!");
+    if (scores.is_best(score)) {
+      scores.insert_score("Anonymous", score);
+    }
+
+    mvprintw(0, display.width + 4, "== High Scores ==");
+    int i = 1;
+    for (auto &line : scores.top_scores()) {
+      mvprintw(i, display.width + 1, "%s", line.name.c_str());
+      mvprintw(i, display.width + 24, "%d", line.score);
+      i++;
+    }
+
     mvprintw(display.height + 2, 0, "Press 'q' to quit, 'r' to retry.");
     int c;
     while ((c = display.block_getch()) != 'r') {
