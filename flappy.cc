@@ -127,7 +127,9 @@ struct World {
       int wall = walls[i];
       if (wall != 0) {
         for (int y = 1; y < display->height - 1; y++) {
-          if (y < wall - kVGap || y > wall + kVGap) {
+          if (y == wall - kVGap - 1|| y == wall + kVGap + 1) {
+            mvaddch(y, i + 1, '=');
+          } else if (y < wall - kVGap || y > wall + kVGap) {
             mvaddch(y, i + 1, '*');
           }
         }
