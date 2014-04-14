@@ -75,10 +75,16 @@ struct World {
     steps++;
     if (steps % kRate == 0) {
       walls.pop_front();
-      if ((steps % (kRate * kHGap)) == 0) {
-        walls.push_back(rand_wall());
-      } else {
-        walls.push_back(0);
+      switch (steps % (kRate * kHGap)) {
+        case 0:
+          walls.push_back(rand_wall());
+          break;
+        case kRate * 1:
+        case kRate * 2:
+          walls.push_back(walls.back());
+          break;
+        default:
+          walls.push_back(0);
       }
     }
   }
