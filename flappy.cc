@@ -8,6 +8,7 @@
 #include <deque>
 #include <ctime>
 #include <cmath>
+#include <cstring>
 #include <ncurses.h>
 
 struct Display {
@@ -102,15 +103,17 @@ struct World {
 struct Bird {
   Bird(Display *display) : y{display->height / 2.0}, display{display} {}
 
-  double y, dy = 0;
+  const double kImpulse = -0.8, kGravity = 0.1;
+
+  double y, dy = kImpulse;
   Display *display;
 
   void gravity() {
-    dy += 0.1;
+    dy += kGravity;
     y += dy;
   }
 
-  void poke() { dy = -0.8; }
+  void poke() { dy = kImpulse; }
 
   void draw() { draw('@'); }
 
@@ -140,6 +143,13 @@ struct Game {
   World world;
 
   bool run() {
+    display->erase();
+    const char *intro = "[Press any key to hop upwards]";
+    mvprintw(display->height / 2 - 2,
+             display->width / 2 - std::strlen(intro) / 2,
+             intro);
+    bird.draw();
+    display->block_getch();
     while (bird.is_alive(world)) {
       int c = getch();
       if (c == 'q') {
