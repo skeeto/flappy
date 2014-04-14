@@ -183,7 +183,7 @@ struct Game {
 
   int run() {
     display->erase();
-    const char *intro = "[Press any key to hop upwards]";
+    const char *intro = "[Press SPACE to hop upwards]";
     mvprintw(display->height / 2 - 2,
              display->width / 2 - std::strlen(intro) / 2,
              intro);
