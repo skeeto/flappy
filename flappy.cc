@@ -12,6 +12,9 @@
 #include "sqlite3.h"
 #include "highscores.hh"
 
+#define STR_(x) #x
+#define STR(x) STR_(x)
+
 struct Display {
   Display(int width = 40, int height = 20) : height{height}, width{width} {
     initscr();
@@ -188,6 +191,7 @@ struct Game {
     const char *intro = "[Press SPACE to hop upwards]";
     mvprintw(display->height / 2 - 2,
              display->width / 2 - std::strlen(intro) / 2, intro);
+    mvprintw(display->height, 0, "Flappy Curses v%s", STR(VERSION));
     bird.draw();
     display->block_getch();
     while (bird.is_alive(world)) {
@@ -231,7 +235,7 @@ int main(int argc, const char **argv) {
     filename = argv[1];
   }
   Display display;
-  HighScores scores{filename, display.height};
+  HighScores scores{filename, display.height - 1};
 
   while (true) {
     Game game{&display};
