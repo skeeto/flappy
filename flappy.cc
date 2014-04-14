@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstring>
 #include <ncurses.h>
+#include <unistd.h>
 #include "sqlite3.h"
 #include "highscores.hh"
 
@@ -234,12 +235,20 @@ void print_scores(Display &display, HighScores &scores) {
   }
 }
 
-int main(int argc, const char **argv) {
+int main(int argc, char **argv) {
   srand(std::time(NULL));
+
+  /* Parse command line arguments. */
+  int opt;
   const char *filename = "/tmp/flappy-scores.db";
-  if (argc > 1) {
-    filename = argv[1];
+  while ((opt = getopt(argc, argv, "d:")) != -1) {
+    switch (opt) {
+      case 'd':
+        filename = optarg;
+        break;
+    }
   }
+
   Display display;
   HighScores scores{filename, display.height - 1};
 
