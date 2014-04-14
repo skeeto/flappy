@@ -19,5 +19,5 @@ clean :
 
 archive : flappy-$(VERSION).tar.gz
 
-flappy-$(VERSION).tar.gz :
+flappy-$(VERSION).tar.gz : *.cc *.hh
 	git archive --format tar --prefix flappy-$(VERSION)/ HEAD | gzip > $@
