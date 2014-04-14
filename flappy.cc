@@ -53,6 +53,37 @@ struct Display {
     timeout(0);
     return c;
   }
+
+  void read_name(int y, int x, char *target, size_t n) {
+    int p = 0;
+    timeout(-1);
+    curs_set(1);
+    bool reading = true;
+    while (reading) {
+      move(y, x + p);
+      refresh();
+      int c = getch();
+      switch (c) {
+        case KEY_ENTER:
+        case '\n':
+        case '\r':
+          reading = false;
+          break;
+        case KEY_LEFT:
+        case KEY_BACKSPACE:
+          if (p > 0) mvaddch(y, x + --p, ' ');
+          break;
+        default:
+          if (p < n - 1) {
+            target[p] = c;
+            mvaddch(y, x + p++, c);
+          }
+      }
+    }
+    target[p + 1] = '\0';
+    timeout(0);
+    curs_set(0);
+  }
 };
 
 struct World {
@@ -181,27 +212,40 @@ struct Game {
   }
 };
 
+void print_scores(Display &display, HighScores &scores) {
+    mvprintw(0, display.width + 4, "== High Scores ==");
+    int i = 1;
+    for (auto &line : scores.top_scores()) {
+      mvprintw(i, display.width + 1, "%s", line.name.c_str());
+      clrtoeol();
+      mvprintw(i, display.width + 24, "%d", line.score);
+      i++;
+    }
+}
+
 int main() {
   srand(std::time(NULL));
   Display display;
   HighScores scores{"/tmp/highscores.db", display.height};
   while (true) {
     Game game{&display};
+
     int score = game.run();
     if (score < 0) {
       return 0;
     }
-    mvprintw(display.height + 1, 0, "Game over!");
-    if (scores.is_best(score)) {
-      scores.insert_score("Anonymous", score);
-    }
 
-    mvprintw(0, display.width + 4, "== High Scores ==");
-    int i = 1;
-    for (auto &line : scores.top_scores()) {
-      mvprintw(i, display.width + 1, "%s", line.name.c_str());
-      mvprintw(i, display.width + 24, "%d", line.score);
-      i++;
+    mvprintw(display.height + 1, 0, "Game over!");
+    print_scores(display, scores);
+    if (scores.is_best(score)) {
+      mvprintw(display.height + 2, 0, "You have a high score!");
+      mvprintw(display.height + 3, 0, "Enter name: ");
+      char name[23] = {0};
+      display.read_name(display.height + 3, 12, name, sizeof(name));
+      scores.insert_score(name, score);
+      move(display.height + 3, 0);
+      clrtoeol();
+      print_scores(display, scores);
     }
 
     mvprintw(display.height + 2, 0, "Press 'q' to quit, 'r' to retry.");
