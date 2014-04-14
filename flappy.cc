@@ -185,8 +185,7 @@ struct Game {
     display->erase();
     const char *intro = "[Press SPACE to hop upwards]";
     mvprintw(display->height / 2 - 2,
-             display->width / 2 - std::strlen(intro) / 2,
-             intro);
+             display->width / 2 - std::strlen(intro) / 2, intro);
     bird.draw();
     display->block_getch();
     while (bird.is_alive(world)) {
@@ -213,14 +212,14 @@ struct Game {
 };
 
 void print_scores(Display &display, HighScores &scores) {
-    mvprintw(0, display.width + 4, "== High Scores ==");
-    int i = 1;
-    for (auto &line : scores.top_scores()) {
-      mvprintw(i, display.width + 1, "%s", line.name.c_str());
-      clrtoeol();
-      mvprintw(i, display.width + 24, "%d", line.score);
-      i++;
-    }
+  mvprintw(0, display.width + 4, "== High Scores ==");
+  int i = 1;
+  for (auto &line : scores.top_scores()) {
+    mvprintw(i, display.width + 1, "%s", line.name.c_str());
+    clrtoeol();
+    mvprintw(i, display.width + 24, "%d", line.score);
+    i++;
+  }
 }
 
 int main(int argc, const char **argv) {
@@ -237,18 +236,21 @@ int main(int argc, const char **argv) {
 
     int score = game.run();
     if (score < 0) {
-      return 0;
+      return 0;  // game quit early
     }
 
+    /* Game over */
     mvprintw(display.height + 1, 0, "Game over!");
     print_scores(display, scores);
+
+    /* Enter new high score */
     if (scores.is_best(score)) {
       mvprintw(display.height + 2, 0, "You have a high score!");
       mvprintw(display.height + 3, 0, "Enter name: ");
       char name[23] = {0};
       display.read_name(display.height + 3, 12, name, sizeof(name));
       if (std::strlen(name) == 0) {
-        std::strcpy(name, "[anonymous]");
+        std::strcpy(name, "(anonymous)");
       }
       scores.insert_score(name, score);
       move(display.height + 3, 0);
@@ -256,6 +258,7 @@ int main(int argc, const char **argv) {
       print_scores(display, scores);
     }
 
+    /* Handle quit/restart */
     mvprintw(display.height + 2, 0, "Press 'q' to quit, 'r' to retry.");
     int c;
     while ((c = display.block_getch()) != 'r') {

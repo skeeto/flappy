@@ -4,16 +4,13 @@
 
 static const char *table =
     "CREATE TABLE IF NOT EXISTS scores (name STRING, score INTEGER)";
-static const char *timeout =
-    "PRAGMA busy_timeout = 30000";
+static const char *timeout = "PRAGMA busy_timeout = 30000";
 static const char *top =
     "SELECT name, score FROM scores ORDER BY score DESC LIMIT ?";
-static const char *place =
-    "SELECT count(*) FROM scores WHERE score >= ?";
-static const char *insert =
-    "INSERT INTO scores VALUES (?, ?)";
+static const char *place = "SELECT count(*) FROM scores WHERE score >= ?";
+static const char *insert = "INSERT INTO scores VALUES (?, ?)";
 
-#define REGISTER(name)                                                  \
+#define REGISTER(name) \
   sqlite3_prepare_v2(db, name, std::strlen(name), &stmt_##name, nullptr);
 
 HighScores::HighScores(const char *file, int size) {
@@ -61,7 +58,7 @@ std::vector<listing> HighScores::top_scores() {
   sqlite3_bind_int(stmt_top, 1, size_);
   while (sqlite3_step(stmt_top) == SQLITE_ROW) {
     listing line;
-    const char *name = (const char*) sqlite3_column_text(stmt_top, 0);
+    const char *name = (const char *)sqlite3_column_text(stmt_top, 0);
     size_t length = sqlite3_column_bytes(stmt_top, 0);
     line.name = std::string{name, length};
     line.score = sqlite3_column_int(stmt_top, 1);
