@@ -66,6 +66,7 @@ struct Display {
         case KEY_ENTER:
         case '\n':
         case '\r':
+        case ERR:
           reading = false;
           break;
         case KEY_LEFT:
