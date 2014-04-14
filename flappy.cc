@@ -138,7 +138,7 @@ struct World {
     mvprintw(display->height, 0, "Score: %d", score());
   }
 
-  int score() { return std::max(0, steps / (kRate * kHGap) - 2); }
+  int score() { return std::max(0, (steps - 2) / (kRate * kHGap) - 2); }
 };
 
 struct Bird {
