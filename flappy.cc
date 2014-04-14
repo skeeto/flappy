@@ -223,10 +223,15 @@ void print_scores(Display &display, HighScores &scores) {
     }
 }
 
-int main() {
+int main(int argc, const char **argv) {
   srand(std::time(NULL));
+  const char *filename = "/tmp/flappy-scores.db";
+  if (argc > 1) {
+    filename = argv[1];
+  }
   Display display;
-  HighScores scores{"/tmp/highscores.db", display.height};
+  HighScores scores{filename, display.height};
+
   while (true) {
     Game game{&display};
 
@@ -242,6 +247,9 @@ int main() {
       mvprintw(display.height + 3, 0, "Enter name: ");
       char name[23] = {0};
       display.read_name(display.height + 3, 12, name, sizeof(name));
+      if (std::strlen(name) == 0) {
+        std::strcpy(name, "[anonymous]");
+      }
       scores.insert_score(name, score);
       move(display.height + 3, 0);
       clrtoeol();
