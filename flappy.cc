@@ -1,6 +1,5 @@
 /* flappy.cc --- ncurses flappy bird clone
  * This is free and unencumbered software released into the public domain.
- * c++ -std=c++11 flappy.cc -lncurses -lm -o flappy
  */
 
 #include <algorithm>

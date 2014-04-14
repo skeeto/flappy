@@ -1,6 +1,6 @@
 CXX      = clang++
 CC       = clang
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall -O2
 CFLAGS   = -O3 -DSQLITE_THREADSAFE=0
 LDLIBS   = -lncurses -ldl -lstdc++ -lm
 
