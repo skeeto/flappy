@@ -87,6 +87,10 @@ struct Display {
     timeout(0);
     curs_set(0);
   }
+
+  void center(int yoff, const char *str) {
+    mvprintw(height / 2 + yoff, width / 2 - std::strlen(str) / 2, "%s", str);
+  }
 };
 
 struct World {
@@ -188,12 +192,14 @@ struct Game {
 
   int run() {
     display->erase();
-    const char *intro = "[Press SPACE to hop upwards]";
-    mvprintw(display->height / 2 - 2,
-             display->width / 2 - std::strlen(intro) / 2, intro);
-    mvprintw(display->height, 0, "Flappy Curses v%s", STR(VERSION));
+    const char *title = "Flappy Curses",
+             *version = "v" STR(VERSION),
+               *intro = "[Press SPACE to hop upwards]";
+    display->center(-3, title);
+    display->center(-2, version);
+    display->center(2, intro);
     bird.draw();
-    display->block_getch();
+    if (display->block_getch() == 'q') return -1;
     while (bird.is_alive(world)) {
       int c = getch();
       if (c == 'q') {
