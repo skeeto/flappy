@@ -135,7 +135,7 @@ struct World {
       int wall = walls[i];
       if (wall != 0) {
         for (int y = 1; y < display->height - 1; y++) {
-          if (y == wall - kVGap - 1|| y == wall + kVGap + 1) {
+          if (y == wall - kVGap - 1 || y == wall + kVGap + 1) {
             mvaddch(y, i + 1, '=');
           } else if (y < wall - kVGap || y > wall + kVGap) {
             mvaddch(y, i + 1, '*');
@@ -193,8 +193,7 @@ struct Game {
 
   int run() {
     display->erase();
-    const char *title = "Flappy Curses",
-             *version = "v" STR(VERSION),
+    const char *title = "Flappy Curses", *version = "v" STR(VERSION),
                *intro = "[Press SPACE to hop upwards]";
     display->center(-3, title);
     display->center(-2, version);
@@ -240,11 +239,16 @@ int main(int argc, char **argv) {
 
   /* Parse command line arguments. */
   int opt;
-  const char *filename = "/tmp/flappy-scores.db";
-  while ((opt = getopt(argc, argv, "d:")) != -1) {
+  const char *filename = "/tmp/flappy-scores.db", *host = "localhost";
+  while ((opt = getopt(argc, argv, "d:h:p")) != -1) {
     switch (opt) {
       case 'd':
         filename = optarg;
+        break;
+      case 'h':
+        host = optarg;
+        break;
+      case 'p':  // ignore
         break;
     }
   }
