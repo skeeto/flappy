@@ -4,6 +4,8 @@ Play online via telnet:
 
  * `telnet flappy.nullprogram.com`
 
+![](http://i.imgur.com/osmc6Ye.gif)
+
 ## Run Your Own Server
 
 Build the game (`make`), install an inetd daemon and telnetd and put
