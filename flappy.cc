@@ -77,6 +77,10 @@ struct Display {
         case KEY_BACKSPACE:
           if (p > 0) mvaddch(y, x + --p, ' ');
           break;
+        case ' ':
+          if (p == 0) {
+            break;
+          }
         default:
           if (p < n - 1) {
             target[p] = c;
