@@ -1,4 +1,4 @@
-VERSION  = 1.0.0
+VERSION  = 1.0.1
 CXX      = clang++
 CC       = clang
 CXXFLAGS = -std=c++11 -Wall -O2 -DVERSION=$(VERSION)
