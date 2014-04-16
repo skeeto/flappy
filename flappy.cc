@@ -57,20 +57,21 @@ struct Display {
     return c;
   }
 
-  void read_name(int y, int x, char *target, size_t n) {
+  bool read_name(int y, int x, char *target, size_t n) {
     int p = 0;
     timeout(-1);
     curs_set(1);
-    bool reading = true;
+    bool reading = true, cancelled = false;
     while (reading) {
       move(y, x + p);
       refresh();
       int c = getch();
       switch (c) {
+        case '':
+          cancelled = true;
         case KEY_ENTER:
         case '\n':
         case '\r':
-        case '':
         case ERR:
           reading = false;
           break;
@@ -92,6 +93,7 @@ struct Display {
     target[p + 1] = '\0';
     timeout(0);
     curs_set(0);
+    return !cancelled;
   }
 
   void center(int yoff, const char *str) {
@@ -282,7 +284,9 @@ int main(int argc, char **argv) {
       mvprintw(display.height + 2, 0, "You have a high score!");
       mvprintw(display.height + 3, 0, "Enter name: ");
       char name[23] = {0};
-      display.read_name(display.height + 3, 12, name, sizeof(name));
+      if (!display.read_name(display.height + 3, 12, name, sizeof(name))) {
+        return 0;
+      }
       if (std::strlen(name) == 0) {
         std::strcpy(name, "(anonymous)");
       }
