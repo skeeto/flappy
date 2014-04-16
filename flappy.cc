@@ -70,6 +70,7 @@ struct Display {
         case KEY_ENTER:
         case '\n':
         case '\r':
+        case '':
         case ERR:
           reading = false;
           break;
@@ -97,6 +98,10 @@ struct Display {
     mvprintw(height / 2 + yoff, width / 2 - std::strlen(str) / 2, "%s", str);
   }
 };
+
+bool is_exit(int c) {
+  return c == 'q' || c == '';
+}
 
 struct World {
   World(Display *display) : display{display} {
@@ -203,10 +208,10 @@ struct Game {
     display->center(-2, version);
     display->center(2, intro);
     bird.draw();
-    if (display->block_getch() == 'q') return -1;
+    if (is_exit(display->block_getch())) return -1;
     while (bird.is_alive(world)) {
       int c = getch();
-      if (c == 'q') {
+      if (is_exit(c)) {
         return -1;
       } else if (c != ERR) {
         while (getch() != ERR)
@@ -291,7 +296,7 @@ int main(int argc, char **argv) {
     mvprintw(display.height + 2, 0, "Press 'q' to quit, 'r' to retry.");
     int c;
     while ((c = display.block_getch()) != 'r') {
-      if (c == 'q' || c == ERR) {
+      if (is_exit(c) || c == ERR) {
         return 0;
       }
     }
