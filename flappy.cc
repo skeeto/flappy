@@ -19,6 +19,7 @@
 struct Display {
   Display(int width = 40, int height = 20) : height{height}, width{width} {
     initscr();
+    start_color();
     raw();
     timeout(0);
     noecho();
@@ -27,7 +28,10 @@ struct Display {
     erase();
   }
 
-  ~Display() { endwin(); }
+  ~Display() {
+    endwin();
+    fflush(stdout);
+  }
 
   void erase() {
     ::erase();
@@ -61,6 +65,9 @@ struct Display {
     int p = 0;
     timeout(-1);
     curs_set(1);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+    int style = A_BOLD | A_UNDERLINE | COLOR_PAIR(4);
+    attron(style);
     bool reading = true, cancelled = false;
     while (reading) {
       move(y, x + p);
@@ -77,7 +84,9 @@ struct Display {
           break;
         case KEY_LEFT:
         case KEY_BACKSPACE:
+          attroff(style);
           if (p > 0) mvaddch(y, x + --p, ' ');
+          attron(style);
           break;
         case ' ':
           if (p == 0) {
@@ -91,6 +100,7 @@ struct Display {
       }
     }
     target[p + 1] = '\0';
+    attroff(style);
     timeout(0);
     curs_set(0);
     return !cancelled;
@@ -101,9 +111,7 @@ struct Display {
   }
 };
 
-bool is_exit(int c) {
-  return c == 'q' || c == '';
-}
+bool is_exit(int c) { return c == 'q' || c == ''; }
 
 struct World {
   World(Display *display) : display{display} {
@@ -142,19 +150,29 @@ struct World {
   }
 
   void draw() {
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_GREEN, COLOR_GREEN);
+    attron(COLOR_PAIR(2));
     for (int i = 0; i < walls.size(); i++) {
       int wall = walls[i];
       if (wall != 0) {
         for (int y = 1; y < display->height - 1; y++) {
           if (y == wall - kVGap - 1 || y == wall + kVGap + 1) {
+            attroff(COLOR_PAIR(2));
+            attron(COLOR_PAIR(3));
             mvaddch(y, i + 1, '=');
+            attroff(COLOR_PAIR(3));
+            attron(COLOR_PAIR(2));
           } else if (y < wall - kVGap || y > wall + kVGap) {
-            mvaddch(y, i + 1, '*');
+            mvaddch(y, i + 1, '|');
           }
         }
       }
     }
+    attroff(COLOR_PAIR(2));
+    attron(A_BOLD);
     mvprintw(display->height, 0, "Score: %d", score());
+    attroff(A_BOLD);
   }
 
   int score() { return std::max(0, (steps - 2) / (kRate * kHGap) - 2); }
@@ -175,7 +193,12 @@ struct Bird {
 
   void poke() { dy = kImpulse; }
 
-  void draw() { draw('@'); }
+  void draw() {
+    init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+    attron(COLOR_PAIR(1) | A_BOLD);
+    draw('@');
+    attroff(COLOR_PAIR(1) | A_BOLD);
+  }
 
   void draw(int c) {
     int h = std::round(y);
@@ -228,14 +251,19 @@ struct Game {
       display->refresh();
       std::this_thread::sleep_for(std::chrono::milliseconds{67});
     }
+    init_pair(5, COLOR_RED, COLOR_BLACK);
+    attron(COLOR_PAIR(5) | A_BOLD);
     bird.draw('X');
+    attroff(COLOR_PAIR(5) | A_BOLD);
     display->refresh();
     return world.score();
   }
 };
 
 void print_scores(Display &display, HighScores &scores) {
+  attron(A_BOLD);
   mvprintw(0, display.width + 4, "== High Scores ==");
+  attroff(A_BOLD);
   int i = 1;
   for (auto &line : scores.top_scores()) {
     mvprintw(i, display.width + 1, "%s", line.name.c_str());
@@ -281,8 +309,10 @@ int main(int argc, char **argv) {
 
     /* Enter new high score */
     if (scores.is_best(score)) {
+      attron(A_BOLD);
       mvprintw(display.height + 2, 0, "You have a high score!");
       mvprintw(display.height + 3, 0, "Enter name: ");
+      attroff(A_BOLD);
       char name[23] = {0};
       if (!display.read_name(display.height + 3, 12, name, sizeof(name))) {
         return 0;
