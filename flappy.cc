@@ -228,10 +228,15 @@ struct Game {
   int run() {
     display->erase();
     const char *title = "Flappy Curses", *version = "v" STR(VERSION),
-               *intro = "[Press SPACE to hop upwards]";
+               *intro = "[Press SPACE to hop upwards]",
+                 *url = "https://github.com/skeeto/flappy";
     display->center(-3, title);
     display->center(-2, version);
     display->center(2, intro);
+    init_pair(6, COLOR_CYAN, COLOR_BLACK);
+    attron(COLOR_PAIR(6) | A_UNDERLINE);
+    display->center(10, url);
+    attroff(COLOR_PAIR(6) | A_UNDERLINE);
     bird.draw();
     if (is_exit(display->block_getch())) return -1;
     while (bird.is_alive(world)) {
