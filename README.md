@@ -4,7 +4,7 @@ Play online via telnet:
 
  * `telnet flappy.nullprogram.com`
 
-![](http://i.imgur.com/osmc6Ye.gif)
+![](http://i.imgur.com/BEzBFl8.gif)
 
 ## Run Your Own Server
 
